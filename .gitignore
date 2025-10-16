@@ -1,0 +1,4 @@
+.venv/
+news_app/news/__pycache__
+news_app/news_app/__pycache__
+news_app/db.sqlite3

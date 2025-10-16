@@ -1,0 +1,34 @@
+services:
+
+  redis:
+    image: redis:7.0.11-alpine
+
+  django:
+    container_name: django
+    build:
+      context: ./news_app
+    command: python3 manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./news_app:/usr/src/app/
+    ports:
+      - 8001:8000
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=7f95d0823172f9043791137175d94e33fc1fa750ba1b0f4e40f6db3d305fb41e
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+    depends_on:
+      - redis
+  
+  celery:
+    container_name: celery
+    build:
+      context: ./news_app
+    command: celery --app=news_app worker -l INFO
+    volumes:
+      - ./news_app:/usr/src/app/
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=7f95d0823172f9043791137175d94e33fc1fa750ba1b0f4e40f6db3d305fb41e
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+    depends_on:
+      - redis

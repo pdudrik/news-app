@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    News - Articles
+{% endblock title %}
+
+{% block content %}
+    <h1>News - Articles</h1>
+    <br>
+    {% for article in articles %}
+        <h2>{{ article.title }}</h2>
+        <p>From {{ article.source_name }} - {{ article.published }}</p>
+        {% if article.digest is None %}
+            <p>Digest: not set</p>
+        {% else %}
+            <p>Digest: {{ article.digest }}</p>
+        {% endif %}
+        <p>Link: {{ article.link }}</p>
+        <p>{{ article.summary }}</p>
+        <br>
+    {% endfor %}
+{% endblock content %}
