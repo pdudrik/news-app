@@ -37,7 +37,6 @@ def news_home_view(request):
     print(articles)
 
     return render(request, "news/home.html", { "articles": articles })
-    # return HttpResponse("Testing response")
 
 
 def update(request):
@@ -55,8 +54,6 @@ def schedule_task(request):
         interval=interval,
         name="my-schedule",
         task="news.tasks.fetch_new_rss_data",
-        # args=json.dumps([1, 3]),
-        # one_off=True
     )
 
     return HttpResponse("Task scheduled!")

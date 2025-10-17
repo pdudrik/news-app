@@ -15,7 +15,7 @@ class Article(models.Model):
     title = models.CharField()
     link = models.URLField(unique=True)
     published = models.DateTimeField()
-    summary = models.TextField()
+    summary = models.TextField(blank=True)
 
     def __str__(self):
         return self.title

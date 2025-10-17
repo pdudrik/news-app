@@ -1,37 +1,47 @@
 import feedparser
+from django.db import IntegrityError, transaction
 from celery import shared_task
-from .models import NewsSource
-
+from .models import NewsSource, Article
+from .utils import parse_entry_datetime
 
 
 @shared_task
 def fetch_new_rss_data():
-    articles = []
-    for source in NewsSource.objects.all():
+    new_articles = 0
+    sources = NewsSource.objects.all()
+    for source in sources:
         parsed_feed = feedparser.parse(source.rss_url)
 
         for article_raw in parsed_feed["entries"]:
-            article_data = {
-                "title": article_raw["title"],
-                "link": article_raw["link"],
-                "published": article_raw["published"],
-                "source": source.rss_url
-            }
+            article = Article()
+            article.title = article_raw["title"]
+            article.link = article_raw["link"]
+            article.source = source
+
+            parsed_dt = parse_entry_datetime(article_raw["published"])
+            if parsed_dt is None:
+                continue
+            
+            article.published = parsed_dt
 
             feed_entries = article_raw.keys()
             if "summary" in feed_entries:
-                article_data["summary"] = article_raw["summary"]
+                article.summary = article_raw["summary"]
             
             elif "description" in feed_entries:
-                article_data["summary"] = article_raw["description"]
+                article.summary = article_raw["description"]
             
             else:
-                article_data["summary"] = None
+                article.summary = ""
             
-            articles.append(article_data)
+            try:
+                with transaction.atomic():
+                    article.save(force_insert=True)
+                    new_articles += 1
+            
+            except IntegrityError:
+                pass
+
     
-    for article in articles:
-        print(f"TITLE: {article['title']}")
-    
-    return "Task completed!"
+    return f"Task completed! Added new articles: {new_articles}"
 
