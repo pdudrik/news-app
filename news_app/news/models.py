@@ -3,7 +3,7 @@ from django.db import models
 
 class NewsSource(models.Model):
     name = models.CharField()
-    rss_url = models.URLField()
+    rss_url = models.URLField(unique=True)
     active = models.BooleanField()
 
     def __str__(self):
@@ -13,7 +13,7 @@ class NewsSource(models.Model):
 class Article(models.Model):
     source = models.ForeignKey(NewsSource, on_delete=models.CASCADE)
     title = models.CharField()
-    link = models.URLField()
+    link = models.URLField(unique=True)
     published = models.DateTimeField()
     summary = models.TextField()
 
@@ -22,7 +22,7 @@ class Article(models.Model):
 
 
 class Digest(models.Model):
-    name = models.CharField()
+    name = models.CharField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

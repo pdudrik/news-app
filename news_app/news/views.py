@@ -1,6 +1,9 @@
+import json
 from django.shortcuts import render
 from django.http import HttpResponse
+from django_celery_beat.models import PeriodicTask, IntervalSchedule
 from .models import Article, DigestArticle, Digest
+from .tasks import fetch_new_rss_data
 
 
 # Create your views here.
@@ -35,3 +38,25 @@ def news_home_view(request):
 
     return render(request, "news/home.html", { "articles": articles })
     # return HttpResponse("Testing response")
+
+
+def update(request):
+    fetch_new_rss_data.delay()
+    return HttpResponse("Task started!")
+
+
+def schedule_task(request):
+    interval, _ = IntervalSchedule.objects.get_or_create(
+        every=60,
+        period=IntervalSchedule.SECONDS,
+    )
+
+    PeriodicTask.objects.create(
+        interval=interval,
+        name="my-schedule",
+        task="news.tasks.fetch_new_rss_data",
+        # args=json.dumps([1, 3]),
+        # one_off=True
+    )
+
+    return HttpResponse("Task scheduled!")

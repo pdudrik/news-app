@@ -32,3 +32,16 @@ services:
       - ALLOWED_HOSTS=localhost,127.0.0.1
     depends_on:
       - redis
+  celery_beat:
+    container_name: celery_beat
+    build:
+      context: ./news_app
+    command: celery -A news_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./news_app:/usr/src/app/
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=7f95d0823172f9043791137175d94e33fc1fa750ba1b0f4e40f6db3d305fb41e
+      - ALLOWED_HOSTS=localhost,127.0.0.1
+    depends_on:
+      - redis
